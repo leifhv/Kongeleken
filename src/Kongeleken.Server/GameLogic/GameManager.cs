@@ -189,9 +189,28 @@ namespace Kongeleken.Server.GameLogic
                     game.GameActions.Add($"{playerWithKing.Name} got a king! ***DRINK!***");
                 }
 
+                //Handle queen
+                var playersWithQueen = game.Players.Where(p => p.CurrentCard.Value == CardValue.Queen);
+                foreach (var playerWithQueen in playersWithQueen)
+                {
+                    var playersWithPictureCard = game.Players.Where(p => p.CurrentCard.Value == CardValue.Queen
+                    || p.CurrentCard.Value == CardValue.Jack
+                    || p.CurrentCard.Value == CardValue.King).Where(p => p != playerWithQueen);
+
+                    var playerNames = string.Join(",", playersWithPictureCard.Select(l => l.Name));
+
+                    game.GameActions.Add($"{playerWithQueen.Name} got a queen! {playerNames} must DRINK!");
+                }
+
+                //Handle jack
+                var playersWithJack = game.Players.Where(p => p.CurrentCard.Value == CardValue.Jack);
+                foreach (var playerWithJack in playersWithJack)
+                {
+                    var playersExceptCurrent = game.Players.Where(p => p != playerWithJack);
+                    var playerNames = string.Join(",", playersExceptCurrent.Select(l => l.Name));
+                    game.GameActions.Add($"{playerWithJack.Name} got a jack! {playerNames} must DRINK!");
+                }
                 //TODO:
-                //For each player that gets a queen every other player with a picture card(king, queen or jack) must drink some of his personal drink.
-                //For each player that get a jack every other player must drink some of his personal drink.
                 //If a player receives a 6 of hearts he is to be given three new cards and all players must act according to these cards before a new round is started.
                 //If a player receives a 6 of diamonds the player to the left of him is to be given three new cards and all players must act according  the these cards before a new round is started.
             }

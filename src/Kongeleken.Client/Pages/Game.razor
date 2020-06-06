@@ -15,303 +15,316 @@ else
 {
     <div class="mat-elevation-z2" style="margin:2em;">
         <div class="form-group">
-            <MatStringField ReadOnly="true" TextArea="true" Value="@_game.Id" Label="Game Id"></MatStringField>
-            <MatStringField ReadOnly="true" TextArea="true" Value="@_playerName" Label="Player Name"></MatStringField>
+            <div class="row">
+                <div class="col-md-3">
+                    <MatStringField ReadOnly="true" TextArea="true" Value="@_game.Id" Label="Game Id"></MatStringField>
+                </div>
+                <div class="col-md-3">
+                    <MatStringField ReadOnly="true" TextArea="true" Value="@_playerName" Label="Player Name"></MatStringField>
+                </div>
+                <div class="col-md-3">
+                    <MatStringField ReadOnly="true" TextArea="true" Value="@_game.DealerName" Label="Dealer Name"></MatStringField>
+                </div>
+                <div class="col-md-3">
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="mat-elevation-z2" style="margin:2em;">
+    <div style="margin:2em;">
         <MatButton Raised="true" OnClick="DealCardsClicked" Disabled=@DealDisabled> Deal </MatButton>
         <MatButton Raised="true" OnClick="ShuffleCardsClicked" Disabled=@ShuffleDisabled> Shuffle </MatButton>
         <MatButton Raised="true" OnClick="RefreshGameClicked"> Refresh </MatButton>
     </div>
 
+    <div class="mat-elevation-z2" style="margin:2em;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Cards</th>
+                    <th>.....</th>
+                </tr>
+            </thead>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Previous Cards</th>
-                <th>Current Cards</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @if (_game != null)
-            {
-                @foreach (var player in _game.Players)
+            <tbody>
+                @if (_game != null)
                 {
-                    <tr>
-                        <td>@player.Name</td>
-                        <td>
-                            @foreach (var hiddenCard in player.FaceDownCards)
-                            {
-                                <img src="/cardback.png"
-                                     asp-append-version="true" height="80"
-                                     @onclick="@(() => @TurnCard(hiddenCard))" />
-                            }
-                        </td>
-                        <td>
-                            @foreach (var visibleCard in player.FaceUpCards)
-                            {
-                                <img src="@CardToFileName(visibleCard)"
-                                     asp-append-version="true" height="80" />
-                            }
-                        </td>
+                    @foreach (var player in _game.Players)
+                    {
+                        <tr>
+                            <td>@player.Name</td>
+                            <td>
+                                @foreach (var hiddenCard in player.FaceDownCards)
+                                {
+                                    <img src="/cardback.png"
+                                         asp-append-version="true" height="80"
+                                         @onclick="@(() => @TurnCard(hiddenCard))" />
+                                }
+                            </td>
+                            <td>
+                                @foreach (var visibleCard in player.FaceUpCards)
+                                {
+                                    <img src="@CardToFileName(visibleCard)"
+                                         asp-append-version="true" height="80" />
+                                }
+                            </td>
 
-                    </tr>
+                        </tr>
+                    }
                 }
-            }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Game Action</th>
-            </tr>
-        </thead>
+    <div class="mat-elevation-z2" style="margin:2em;">    
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Game Action</th>
+                </tr>
+            </thead>
 
-        <tbody>
-            @if (_game != null)
-            {
-                @foreach (var gameAction in _game.GameActions)
+            <tbody>
+                @if (_game != null)
                 {
-                    <tr>
-                        <td class="small">@gameAction</td>
-                    </tr>
+                    @foreach (var gameAction in _game.GameActions)
+                    {
+                        <tr>
+                            <td class="small">@gameAction</td>
+                        </tr>
+                    }
                 }
-            }
-        </tbody>
-    </table>
-
+            </tbody>
+        </table>
+    </div>
 }
-@code {
+        @code {
 
     private GameDto _game;
-    private string _playerId = "";
-    private string _gameId = "";
-    private string _playerName = "";
-    private bool? _loading;
-    private string _errorMessage = "";
-    private System.Threading.Timer _timer;
+        private string _playerId = "";
+        private string _gameId = "";
+        private string _playerName = "";
+        private bool? _loading;
+        private string _errorMessage = "";
+        private System.Threading.Timer _timer;
 
-    public bool DealDisabled
-    {
-        get
+        public bool DealDisabled
         {
-            return _game == null || _game.PlayerIsDealer == false;
-        }
-    }
-
-    public bool ShuffleDisabled
-    {
-        get
-        {
-            return _game == null || _game.PlayerIsDealer == false;
-        }
-    }
-
-    #region Event Callbacks
-    private async Task StartGameHandler(string playerName)
-    {
-        _playerName = playerName;
-        await StartNewGameClicked();
-    }
-
-    private async Task JoinGameHandler(Tuple<string, string> playerNameGameId)
-    {
-        _playerName = playerNameGameId.Item1;
-        _gameId = playerNameGameId.Item2;
-        await JoinGameClicked();
-    }
-
-    #endregion
-
-
-
-    private async Task StartNewGameClicked()
-    {
-        _playerId = Guid.NewGuid().ToString();
-
-        if (string.IsNullOrEmpty(_playerName))
-        {
-            _errorMessage = "No playername?";
-            return;
+            get
+            {
+                return _game == null || _game.PlayerIsDealer == false;
+            }
         }
 
-        var request = new StartNewGameRequest();
-        request.PlayerId = _playerId;
-        request.PlayerName = _playerName;
-
-        var httpResponse = await Http.PostAsJsonAsync<StartNewGameRequest>($"api/game", request);
-
-        if (httpResponse.IsSuccessStatusCode)
+        public bool ShuffleDisabled
         {
-            var response = await httpResponse.Content.ReadFromJsonAsync<StartNewGameResponse>();
-            _game = response.Game;
-            _playerId = response.NewPlayerId;
-        }
-        else
-        {
-            _errorMessage = httpResponse.StatusCode + ":" + httpResponse.ReasonPhrase;
-        }
-    }
-
-    private async Task JoinGameClicked()
-    {
-        if (string.IsNullOrEmpty(_playerName))
-        {
-            return;
-        }
-        if (string.IsNullOrEmpty(_gameId))
-        {
-            return;
+            get
+            {
+                return _game == null || _game.PlayerIsDealer == false;
+            }
         }
 
-
-
-        var request = new AddPlayerRequest();
-        request.GameId = _gameId;
-        request.PlayerName = _playerName;
-        var newPlayerId = Guid.NewGuid().ToString();
-        request.PlayerId = newPlayerId;
-
-        var httpResponse = await Http.PostAsJsonAsync<AddPlayerRequest>($"api/game/player", request).ConfigureAwait(false);
-
-
-        if (httpResponse.IsSuccessStatusCode)
+        #region Event Callbacks
+        private async Task StartGameHandler(string playerName)
         {
-
-            var response = await httpResponse.Content.ReadFromJsonAsync<AddPlayerResponse>();
-            _game = response.Game;
-            _playerId = response.NewPlayerId;
-        }
-        else
-        {
-            _errorMessage = httpResponse.StatusCode + ":" + httpResponse.ReasonPhrase;
-        }
-    }
-
-    public async Task<GameDto> GetGame()
-    {
-        if (_game != null)
-        {
-            return await Http.GetFromJsonAsync<GameDto>($"api/game?id={_game.Id}&playerId={_playerId}");
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-
-    private async Task ShuffleCardsClicked()
-    {
-        await PostGameEvent(GameEventType.ShuffleDeck);
-    }
-
-    private async Task TurnCard(FaceDownCardDto card)
-    {
-        await PostGameEvent(GameEventType.TurnCard);
-
-        //var request = new TurnCardRequest();
-        //request.GameId = _game.Id;
-        //request.PlayerId = _playerId;
-        //request.CardId = card.Id;
-
-        //var httpResponse = await Http.PostAsJsonAsync<TurnCardRequest>($"api/game/card", request);
-
-        //if (httpResponse.IsSuccessStatusCode)
-        //{
-        //    _game = await GetGame(_game.Id);
-        //    _errorMessage = "Turned card " + card.Id;
-        //}
-        //else
-        //{
-        //    _errorMessage = httpResponse.StatusCode + ":" + httpResponse.ReasonPhrase;
-        //}
-    }
-
-    private string CardToFileName(CardDto card)
-    {
-        string fileName = "Gfx/";
-        switch (card.Suit)
-        {
-            case CardSuit.Club:
-                fileName += "Clubs ";
-                break;
-            case CardSuit.Diamond:
-                fileName += "Diamond ";
-                break;
-            case CardSuit.Heart:
-                fileName += "Hearts ";
-                break;
-            case CardSuit.Spade:
-                fileName += "Spades ";
-                break;
-            case CardSuit.None:
-                fileName += "Joker Black";
-                break;
-            default:
-                throw new Exception("Uknown card suit?");
+            _playerName = playerName;
+            await StartNewGameClicked();
         }
 
-        var cardValue = Math.Abs((int)card.Value);
-        if (cardValue != 0)
+        private async Task JoinGameHandler(Tuple<string, string> playerNameGameId)
         {
-            fileName += cardValue.ToString();
+            _playerName = playerNameGameId.Item1;
+            _gameId = playerNameGameId.Item2;
+            await JoinGameClicked();
         }
 
-        fileName += ".png";
-        return fileName;
-    }
+        #endregion
 
-    private async Task RefreshGameClicked()
-    {
-        _game = await GetGame();
-    }
 
-    private async Task DealCardsClicked()
-    {
-        await PostGameEvent(GameEventType.Deal);
-    }
 
-    private async Task PostGameEvent(GameEventType gameEventType)
-    {
-        var request = new NewGameEventRequest();
-        request.GameEvent = new GameEventDto();
-        request.GameEvent.EventType = gameEventType;
-        request.GameEvent.GameId = _game.Id;
-        request.GameEvent.PlayerId = _playerId;
+        private async Task StartNewGameClicked()
+        {
+            _playerId = Guid.NewGuid().ToString();
 
-        var httpResponse = await Http.PostAsJsonAsync<NewGameEventRequest>($"api/game/event", request);
+            if (string.IsNullOrEmpty(_playerName))
+            {
+                _errorMessage = "No playername?";
+                return;
+            }
 
-        if (httpResponse.IsSuccessStatusCode)
+            var request = new StartNewGameRequest();
+            request.PlayerId = _playerId;
+            request.PlayerName = _playerName;
+
+            var httpResponse = await Http.PostAsJsonAsync<StartNewGameRequest>($"api/game", request);
+
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                var response = await httpResponse.Content.ReadFromJsonAsync<StartNewGameResponse>();
+                _game = response.Game;
+                _playerId = response.NewPlayerId;
+            }
+            else
+            {
+                _errorMessage = httpResponse.StatusCode + ":" + httpResponse.ReasonPhrase;
+            }
+        }
+
+        private async Task JoinGameClicked()
+        {
+            if (string.IsNullOrEmpty(_playerName))
+            {
+                return;
+            }
+            if (string.IsNullOrEmpty(_gameId))
+            {
+                return;
+            }
+
+
+
+            var request = new AddPlayerRequest();
+            request.GameId = _gameId;
+            request.PlayerName = _playerName;
+            var newPlayerId = Guid.NewGuid().ToString();
+            request.PlayerId = newPlayerId;
+
+            var httpResponse = await Http.PostAsJsonAsync<AddPlayerRequest>($"api/game/player", request).ConfigureAwait(false);
+
+
+            if (httpResponse.IsSuccessStatusCode)
+            {
+
+                var response = await httpResponse.Content.ReadFromJsonAsync<AddPlayerResponse>();
+                _game = response.Game;
+                _playerId = response.NewPlayerId;
+            }
+            else
+            {
+                _errorMessage = httpResponse.StatusCode + ":" + httpResponse.ReasonPhrase;
+            }
+        }
+
+        public async Task<GameDto> GetGame()
+        {
+            if (_game != null)
+            {
+                return await Http.GetFromJsonAsync<GameDto>($"api/game?id={_game.Id}&playerId={_playerId}");
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+
+        private async Task ShuffleCardsClicked()
+        {
+            await PostGameEvent(GameEventType.ShuffleDeck);
+        }
+
+        private async Task TurnCard(FaceDownCardDto card)
+        {
+            await PostGameEvent(GameEventType.TurnCard);
+
+            //var request = new TurnCardRequest();
+            //request.GameId = _game.Id;
+            //request.PlayerId = _playerId;
+            //request.CardId = card.Id;
+
+            //var httpResponse = await Http.PostAsJsonAsync<TurnCardRequest>($"api/game/card", request);
+
+            //if (httpResponse.IsSuccessStatusCode)
+            //{
+            //    _game = await GetGame(_game.Id);
+            //    _errorMessage = "Turned card " + card.Id;
+            //}
+            //else
+            //{
+            //    _errorMessage = httpResponse.StatusCode + ":" + httpResponse.ReasonPhrase;
+            //}
+        }
+
+        private string CardToFileName(CardDto card)
+        {
+            string fileName = "Gfx/";
+            switch (card.Suit)
+            {
+                case CardSuit.Club:
+                    fileName += "Clubs ";
+                    break;
+                case CardSuit.Diamond:
+                    fileName += "Diamond ";
+                    break;
+                case CardSuit.Heart:
+                    fileName += "Hearts ";
+                    break;
+                case CardSuit.Spade:
+                    fileName += "Spades ";
+                    break;
+                case CardSuit.None:
+                    fileName += "Joker Black";
+                    break;
+                default:
+                    throw new Exception("Uknown card suit?");
+            }
+
+            var cardValue = Math.Abs((int)card.Value);
+            if (cardValue != 0)
+            {
+                fileName += cardValue.ToString();
+            }
+
+            fileName += ".png";
+            return fileName;
+        }
+
+        private async Task RefreshGameClicked()
         {
             _game = await GetGame();
         }
-        else
+
+        private async Task DealCardsClicked()
         {
-            _errorMessage = httpResponse.StatusCode + ":" + httpResponse.ReasonPhrase;
+            await PostGameEvent(GameEventType.Deal);
         }
 
-    }
-
-    private async void DoWork(object state)
-    {
-        if (_game != null)
+        private async Task PostGameEvent(GameEventType gameEventType)
         {
-            _game = await GetGame();
-            await InvokeAsync(StateHasChanged);
+            var request = new NewGameEventRequest();
+            request.GameEvent = new GameEventDto();
+            request.GameEvent.EventType = gameEventType;
+            request.GameEvent.GameId = _game.Id;
+            request.GameEvent.PlayerId = _playerId;
+
+            var httpResponse = await Http.PostAsJsonAsync<NewGameEventRequest>($"api/game/event", request);
+
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                _game = await GetGame();
+            }
+            else
+            {
+                _errorMessage = httpResponse.StatusCode + ":" + httpResponse.ReasonPhrase;
+            }
+
         }
-    }
 
-    protected override async Task OnInitializedAsync()
-    {
-        _timer = new System.Threading.Timer(DoWork, null, TimeSpan.Zero,
-            TimeSpan.FromSeconds(3));
-    }
+        private async void DoWork(object state)
+        {
+            if (_game != null)
+            {
+                _game = await GetGame();
+                await InvokeAsync(StateHasChanged);
+            }
+        }
 
-}
+        protected override async Task OnInitializedAsync()
+        {
+            _timer = new System.Threading.Timer(DoWork, null, TimeSpan.Zero,
+                TimeSpan.FromSeconds(3));
+        }
+
+        }

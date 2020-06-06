@@ -5,26 +5,29 @@
         <div class="text-center">
             <MatTextField @bind-Value="PlayerName" Label="Player name"></MatTextField>
         </div>
-        }
-        else
-        {
-        <div class="row">
-            <div class="col-md6"></div>
-            <div class="col-md6"><MatButton Raised="true" OnClick="StartNewGameClicked">Start New Game</MatButton></div>
-        </div>
-        <div class="row">
-            <div class="col-md6">
-                <MatTextField @bind-Value="@GameId" Label="Game Id"></MatTextField>
+    }
+    else
+    {
+        <div class="text-center">
+            <div class="row">
+                <div class="col-md6"></div>
+                <div class="col-md6"><MatButton Raised="true" OnClick="StartNewGameClicked">Start New Game</MatButton></div>
             </div>
-            <div class="col-md6">
-                <MatButton Raised="true" OnClick="JoinGameClicked"> Join Game</MatButton>
+            <div class="row">
+                <div class="col-md6">
+                    <MatTextField @bind-Value="@GameId" Label="Game Id"></MatTextField>
+                </div>
+                <div class="col-md6">
+                    <MatButton Raised="true" OnClick="JoinGameClicked"> Join Game</MatButton>
+                </div>
             </div>
         </div>
-        }
+    }
 </div>
+
 @code {
 
-    [Parameter] public EventCallback<Tuple<string,string>> JoinGame { get; set; }
+    [Parameter] public EventCallback<Tuple<string, string>> JoinGame { get; set; }
     [Parameter] public EventCallback<string> StartGame { get; set; }
 
     [Parameter]
@@ -35,7 +38,7 @@
 
     private async Task JoinGameClicked()
     {
-        await JoinGame.InvokeAsync(new Tuple<string,string>(PlayerName,GameId));
+        await JoinGame.InvokeAsync(new Tuple<string, string>(PlayerName, GameId));
     }
 
     private async Task StartNewGameClicked()

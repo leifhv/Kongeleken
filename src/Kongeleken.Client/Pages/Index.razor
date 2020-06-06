@@ -1,0 +1,24 @@
+﻿@page "/"
+@using Kongeleken.Shared
+@using Kongeleken.Shared.DataObjects;
+@using Kongeleken.Shared.Constants;
+@using Kongeleken.Shared.Messages;
+@inject HttpClient Http
+
+@if (loading == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <Game></Game>
+}
+
+@code {
+    private object loading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = new object();        
+    }  
+}

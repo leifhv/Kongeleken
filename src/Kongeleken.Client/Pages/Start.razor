@@ -3,25 +3,20 @@
     @if (string.IsNullOrEmpty(PlayerName))
     {
         <div class="text-center">
-            <MatTextField @bind-Value="PlayerName" Label="Player name"></MatTextField>
+            <MatTextField @bind-Value="PlayerName" Label="Enter player name"></MatTextField>
         </div>
     }
     else
     {
-        <div class="text-center">
             <div class="row">
-                <div class="col-md6"></div>
-                <div class="col-md6"><MatButton Raised="true" OnClick="StartNewGameClicked">Start New Game</MatButton></div>
+                <div class="col-md-6 col-md-offset-3"><MatButton Raised="true" OnClick="StartNewGameClicked">Start new game</MatButton></div>
             </div>
             <div class="row">
-                <div class="col-md6">
+                <div class="col-md-6 col-md-offset-3">
                     <MatTextField @bind-Value="@GameId" Label="Game Id"></MatTextField>
-                </div>
-                <div class="col-md6">
-                    <MatButton Raised="true" OnClick="JoinGameClicked"> Join Game</MatButton>
+                    <MatButton Raised="true" OnClick="JoinGameClicked"> Join game</MatButton>
                 </div>
             </div>
-        </div>
     }
 </div>
 

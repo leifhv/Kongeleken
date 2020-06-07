@@ -31,7 +31,7 @@ namespace Kongeleken.Server.GameLogic
         private void Init()
         {
             Clear();
-            Add(NewCard(CardSuit.None, CardValue.Joker));
+            //Add(NewCard(CardSuit.None, CardValue.Joker));
             Add(NewCard(CardSuit.Club, CardValue.Ace));
             Add(NewCard(CardSuit.Club, CardValue.Two));
             Add(NewCard(CardSuit.Club, CardValue.Three));

@@ -59,6 +59,12 @@ else
                                     {
                                         <img src="@CardToFileName(visibleCard)"
                                              asp-append-version="true" height="80" />
+
+                                        @if (GetAction(player) != UserAction.None)
+                                        {
+                                            <img src="~/Gfx/Beer.png"
+                                                 asp-append-version="true" height="80" />
+                                        }
                                     }
                                 </div>
                             </div>
@@ -78,10 +84,10 @@ else
                 <tbody>
                     @if (_game != null)
                     {
-                        @foreach (var gameAction in _game.GameActions.OrderBy(a => a.When).Take(10))
+                        @foreach (var gameAction in _game.GameActions) // .OrderBy(a => a.When).Take(10))
                         {
                             <tr>
-                                <td class="small">@gameAction.Action</td>
+                                <td class="small">@gameAction.Description</td>
                             </tr>
                         }
                     }
@@ -320,6 +326,18 @@ else
             _game = await GetGame();
             await InvokeAsync(StateHasChanged);
         }
+    }
+
+
+    private UserAction GetAction(PlayerDto player)
+    {
+        GameAction action = _game.GameActions.OrderBy(a => a.When).FirstOrDefault(a => a.PlayerId == player.Name);
+        if (action == null)
+        {
+            return UserAction.None;
+        }
+
+        return action.Action;
     }
 
     protected override async Task OnInitializedAsync()

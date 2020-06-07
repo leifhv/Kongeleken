@@ -32,7 +32,7 @@ namespace Kongeleken.Server.GameLogic
         public async Task<Result<StartNewGameResponse>> StartNewGameAsync(string initiatingPlayerName)
         {
             var newGame =  _gameStore.CreateNew();
-            newGame.AddGameAction($"{initiatingPlayerName} started the game");
+            newGame.AddGameAction(initiatingPlayerName, $"{initiatingPlayerName} started the game", UserAction.None);
 
             newGame.CardDeck = new CardDeck();
 
@@ -58,7 +58,7 @@ namespace Kongeleken.Server.GameLogic
 
             game.Players.Add(player);
 
-            game.AddGameAction($"{playerName} joined the game");
+            game.AddGameAction(playerName, $"{playerName} joined the game", UserAction.None);
 
             return newPlayerId;
         }
@@ -136,7 +136,7 @@ namespace Kongeleken.Server.GameLogic
                     break;
                 case GameEventType.ShuffleDeck:
                     game.CardDeck.Shuffle();
-                    game.AddGameAction($"{initiatingPlayer.Name} shuffled the deck");
+                    game.AddGameAction(initiatingPlayer.Name, $"{initiatingPlayer.Name} shuffled the deck", UserAction.None);
                     break;
                 case GameEventType.Deal:
                 { 
@@ -146,11 +146,11 @@ namespace Kongeleken.Server.GameLogic
                         player.CurrentCard.IsTurned = false;
                         game.CardDeck.RemoveAt(0);
                     }
-                    game.AddGameAction($"{initiatingPlayer.Name} dealt cards");
+                    game.AddGameAction(initiatingPlayer.Name, $"{initiatingPlayer.Name} dealt cards", UserAction.None);
                 }
                 break;
                 case GameEventType.TurnCard:
-                    game.AddGameAction($"{initiatingPlayer.Name} turned his card");
+                    game.AddGameAction(initiatingPlayer.Name, $"{initiatingPlayer.Name} turned his card", UserAction.None);
                     HandleTurnCardEvent(gameEventDto, game);
                     break;
                 default:
@@ -173,20 +173,16 @@ namespace Kongeleken.Server.GameLogic
                 var lowestCard = game.Players.Select(p => p.CurrentCard.Value).Min();
                 var loosers = game.Players.Where(p => p.CurrentCard.Value == lowestCard);
 
-                if(loosers.Count() == 1)
+                foreach (var loser in loosers)
                 {
-                    game.GameActions.Add(new GameAction($"Lowest card is {lowestCard}. Looser this round is {loosers.First().Name}.  DRINK!"));
-                }
-                else
-                {
-                    game.GameActions.Add(new GameAction($"Lowest card is {lowestCard}. Loosers this round are " + string.Join(",", loosers.Select(l => l.Name)) + ".  DRINK!"));
+                    game.GameActions.Add(new GameAction(loser.Name, $"Lowest card is {lowestCard}. Looser this round is {loser.Name}.  DRINK!", UserAction.Drink));
                 }
 
                 //Handle king
                 var playersWithKing = game.Players.Where(p => p.CurrentCard.Value == CardValue.King);
                 foreach (var playerWithKing in playersWithKing)
                 {
-                    game.GameActions.Add(new GameAction($"{playerWithKing.Name} got a king! ***DRINK!***"));
+                    game.GameActions.Add(new GameAction(playerWithKing.Name, $"{playerWithKing.Name} got a king! ***DRINK!***", UserAction.DrinkKing));
                 }
 
                 //Handle queen
@@ -199,7 +195,7 @@ namespace Kongeleken.Server.GameLogic
 
                     var playerNames = string.Join(",", playersWithPictureCard.Select(l => l.Name));
 
-                    game.GameActions.Add(new GameAction($"{playerWithQueen.Name} got a queen! {playerNames} must DRINK!"));
+                    game.GameActions.Add(new GameAction(playerWithQueen.Name, $"{playerWithQueen.Name} got a queen! {playerNames} must DRINK!", UserAction.DrinkQueen));
                 }
 
                 //Handle jack
@@ -208,7 +204,7 @@ namespace Kongeleken.Server.GameLogic
                 {
                     var playersExceptCurrent = game.Players.Where(p => p != playerWithJack);
                     var playerNames = string.Join(",", playersExceptCurrent.Select(l => l.Name));
-                    game.GameActions.Add(new GameAction($"{playerWithJack.Name} got a jack! {playerNames} must DRINK!"));
+                    game.GameActions.Add(new GameAction(playerWithJack.Name, $"{playerWithJack.Name} got a jack! {playerNames} must DRINK!", UserAction.DrinkJack));
                 }
                 //TODO:
                 //If a player receives a 6 of hearts he is to be given three new cards and all players must act according to these cards before a new round is started.

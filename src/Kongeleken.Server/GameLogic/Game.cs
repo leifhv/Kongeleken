@@ -19,14 +19,10 @@ namespace Kongeleken.Server.GameLogic
         
         public string DealerPlayerId { get; set; }
 
-        public List<GameAction> GameActions = new List<GameAction>();
-        public void AddGameAction(string gameActionDescription)
+        public List<GameAction> GameActions { get; set; } = new List<GameAction>();
+        public void AddGameAction(string playerId, string gameActionDescription, UserAction userAction)
         {
-            GameActions.Add(new GameAction(gameActionDescription));
-            if(GameActions.Count> 10)
-            {
-                GameActions.RemoveAt(0);
-            }
+            GameActions.Add(new GameAction(playerId, gameActionDescription, userAction));
         }
     }
 }

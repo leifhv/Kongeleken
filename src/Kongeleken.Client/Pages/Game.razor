@@ -78,7 +78,7 @@ else
                 <tbody>
                     @if (_game != null)
                     {
-                        @foreach (var gameAction in _game.GameActions)
+                        @foreach (var gameAction in _game.GameActions.OrderBy(a => a.When).Take(10))
                         {
                             <tr>
                                 <td class="small">@gameAction</td>

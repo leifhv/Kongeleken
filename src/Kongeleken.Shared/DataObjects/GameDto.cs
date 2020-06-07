@@ -13,6 +13,6 @@ namespace Kongeleken.Shared.DataObjects
 
         public string DealerName { get; set; }
         public bool PlayerIsDealer { get; set; }
-        public List<string> GameActions{ get; set; }
+        public List<GameAction> GameActions{ get; set; }
     }
 }

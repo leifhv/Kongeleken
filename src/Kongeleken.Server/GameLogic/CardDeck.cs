@@ -16,7 +16,8 @@ namespace Kongeleken.Server.GameLogic
         }
 
         public void Shuffle()
-        {           
+        {
+            Init();
             int n = this.Count;
             while (n > 1)
             {

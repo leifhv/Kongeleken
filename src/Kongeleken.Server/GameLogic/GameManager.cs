@@ -35,6 +35,7 @@ namespace Kongeleken.Server.GameLogic
             newGame.AddGameAction($"{initiatingPlayerName} started the game");
 
             newGame.CardDeck = new CardDeck();
+            newGame.CardDeck.Shuffle();
 
             var newPlayerId =  AddPlayer(newGame, initiatingPlayerName);
             newGame.DealerPlayerId = newPlayerId;  //Player that starts the game is dealer
@@ -128,6 +129,8 @@ namespace Kongeleken.Server.GameLogic
 
             var initiatingPlayer = game.Players.Single(p => p.Id == gameEventDto.PlayerId);
 
+            initiatingPlayer.LastContact = DateTime.Now;
+
             switch (gameEventDto.EventType)
             {
                 case GameEventType.Nothing:
@@ -142,6 +145,7 @@ namespace Kongeleken.Server.GameLogic
                 { 
                     foreach(var player in game.Players)
                     {
+                        player.ClearFlags();
                         player.CurrentCard = game.CardDeck.First();
                         player.CurrentCard.IsTurned = false;
                         game.CardDeck.RemoveAt(0);
@@ -158,6 +162,21 @@ namespace Kongeleken.Server.GameLogic
                     break;
             }
 
+            List<Player> playersForKicking = new List<Player>();
+
+            foreach(var player in game.Players)
+            {
+                if(player.LastContact.Subtract(DateTime.Now).Minutes > 5)
+                {
+                    playersForKicking.Add(player);
+                }
+            }
+
+            foreach(var kickPlayer in playersForKicking)
+            {
+                game.Players.Remove(kickPlayer);
+            }
+
             return DtoMapper.ToDto(game,gameEventDto.PlayerId);
         }
 
@@ -171,8 +190,9 @@ namespace Kongeleken.Server.GameLogic
             if(game.Players.All(p => p.CurrentCard.IsTurned))
             {
                 var lowestCard = game.Players.Select(p => p.CurrentCard.Value).Min();
-                var loosers = game.Players.Where(p => p.CurrentCard.Value == lowestCard);
-
+                var loosers = game.Players.Where(p => p.CurrentCard.Value == lowestCard).ToList();
+                loosers.ForEach(l => l.AddFlag(PlayerFlag.Drink));
+                
                 if(loosers.Count() == 1)
                 {
                     game.GameActions.Add($"Lowest card is {lowestCard}. Looser this round is {loosers.First().Name}.  DRINK!");
@@ -187,6 +207,7 @@ namespace Kongeleken.Server.GameLogic
                 foreach (var playerWithKing in playersWithKing)
                 {
                     game.GameActions.Add($"{playerWithKing.Name} got a king! ***DRINK!***");
+                    playerWithKing.AddFlag(PlayerFlag.King);
                 }
 
                 //Handle queen
@@ -195,10 +216,11 @@ namespace Kongeleken.Server.GameLogic
                 {
                     var playersWithPictureCard = game.Players.Where(p => p.CurrentCard.Value == CardValue.Queen
                     || p.CurrentCard.Value == CardValue.Jack
-                    || p.CurrentCard.Value == CardValue.King).Where(p => p != playerWithQueen);
+                    || p.CurrentCard.Value == CardValue.King).Where(p => p != playerWithQueen).ToList();
+
+                    playersWithPictureCard.ForEach(p => p.AddFlag(PlayerFlag.Drink));
 
                     var playerNames = string.Join(",", playersWithPictureCard.Select(l => l.Name));
-
                     game.GameActions.Add($"{playerWithQueen.Name} got a queen! {playerNames} must DRINK!");
                 }
 
@@ -206,7 +228,9 @@ namespace Kongeleken.Server.GameLogic
                 var playersWithJack = game.Players.Where(p => p.CurrentCard.Value == CardValue.Jack);
                 foreach (var playerWithJack in playersWithJack)
                 {
-                    var playersExceptCurrent = game.Players.Where(p => p != playerWithJack);
+                    var playersExceptCurrent = game.Players.Where(p => p != playerWithJack).ToList();
+                    playersExceptCurrent.ForEach(p => p.AddFlag(PlayerFlag.Drink));
+
                     var playerNames = string.Join(",", playersExceptCurrent.Select(l => l.Name));
                     game.GameActions.Add($"{playerWithJack.Name} got a jack! {playerNames} must DRINK!");
                 }

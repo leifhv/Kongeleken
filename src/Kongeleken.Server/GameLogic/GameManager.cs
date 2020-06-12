@@ -191,10 +191,9 @@ namespace Kongeleken.Server.GameLogic
             {
                 var lowestCard = game.Players.Select(p => p.CurrentCard.Value).Min();
                 var loosers = game.Players.Where(p => p.CurrentCard.Value == lowestCard).ToList();
-                loosers.ForEach(l => l.AddFlag(PlayerFlag.Drink));
-                var loosers = game.Players.Where(p => p.CurrentCard.Value == lowestCard);
                 foreach (var loser in loosers)
                 {
+                    loser.AddFlag(PlayerFlag.Drink);
                     game.GameActions.Add(new GameActionDto(loser.Name, $"Lowest card is {lowestCard}. Looser this round is {loser.Name}.  DRINK!", UserAction.Drink));
                 }
 

@@ -175,14 +175,14 @@ namespace Kongeleken.Server.GameLogic
 
                 foreach (var loser in loosers)
                 {
-                    game.GameActions.Add(new GameAction(loser.Name, $"Lowest card is {lowestCard}. Looser this round is {loser.Name}.  DRINK!", UserAction.Drink));
+                    game.GameActions.Add(new GameActionDto(loser.Name, $"Lowest card is {lowestCard}. Looser this round is {loser.Name}.  DRINK!", UserAction.Drink));
                 }
 
                 //Handle king
                 var playersWithKing = game.Players.Where(p => p.CurrentCard.Value == CardValue.King);
                 foreach (var playerWithKing in playersWithKing)
                 {
-                    game.GameActions.Add(new GameAction(playerWithKing.Name, $"{playerWithKing.Name} got a king! ***DRINK!***", UserAction.DrinkKing));
+                    game.GameActions.Add(new GameActionDto(playerWithKing.Name, $"{playerWithKing.Name} got a king! ***DRINK!***", UserAction.DrinkKing));
                 }
 
                 //Handle queen
@@ -195,7 +195,7 @@ namespace Kongeleken.Server.GameLogic
 
                     var playerNames = string.Join(",", playersWithPictureCard.Select(l => l.Name));
 
-                    game.GameActions.Add(new GameAction(playerWithQueen.Name, $"{playerWithQueen.Name} got a queen! {playerNames} must DRINK!", UserAction.DrinkQueen));
+                    game.GameActions.Add(new GameActionDto(playerWithQueen.Name, $"{playerWithQueen.Name} got a queen! {playerNames} must DRINK!", UserAction.DrinkQueen));
                 }
 
                 //Handle jack
@@ -204,7 +204,7 @@ namespace Kongeleken.Server.GameLogic
                 {
                     var playersExceptCurrent = game.Players.Where(p => p != playerWithJack);
                     var playerNames = string.Join(",", playersExceptCurrent.Select(l => l.Name));
-                    game.GameActions.Add(new GameAction(playerWithJack.Name, $"{playerWithJack.Name} got a jack! {playerNames} must DRINK!", UserAction.DrinkJack));
+                    game.GameActions.Add(new GameActionDto(playerWithJack.Name, $"{playerWithJack.Name} got a jack! {playerNames} must DRINK!", UserAction.DrinkJack));
                 }
                 //TODO:
                 //If a player receives a 6 of hearts he is to be given three new cards and all players must act according to these cards before a new round is started.

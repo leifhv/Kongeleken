@@ -32,7 +32,7 @@ namespace Kongeleken.Server.GameLogic
                 throw new Exception("No dealer in game!?");
             }
 
-            dto.GameActions = new List<GameAction>();
+            dto.GameActions = new List<GameActionDto>();
             dto.GameActions.AddRange(game.GameActions);
             dto.GameActions.Reverse();
             return dto;

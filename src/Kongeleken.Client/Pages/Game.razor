@@ -331,7 +331,7 @@ else
 
     private UserAction GetAction(PlayerDto player)
     {
-        GameAction action = _game.GameActions.OrderBy(a => a.When).FirstOrDefault(a => a.PlayerId == player.Name);
+        GameActionDto action = _game.GameActions.OrderBy(a => a.When).FirstOrDefault(a => a.PlayerId == player.Name);
         if (action == null)
         {
             return UserAction.None;

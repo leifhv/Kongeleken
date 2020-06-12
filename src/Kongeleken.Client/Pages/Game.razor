@@ -46,9 +46,21 @@ else
                         <div class="col-4 h-100 mb-3">
                             <div class="card mb-4 box-shadow">
                                 <div class="card-header">
-                                    <h4 class="my-0 font-weight-normal">@player.Name</h4>
+                                    <h4 class="my-0 font-weight-normal" style="float:left;" >@player.Name</h4>
+                                    @foreach (var drink in player.PlayerFlags.Where(f => f== PlayerFlag.Drink))
+                                    {
+                                        <img src="gfx/beer.png" style="float:right;" asp-append-version="true" width="48" />
+                                    }
+                                    
+                                    @foreach (var king in player.PlayerFlags.Where(f => f == PlayerFlag.King))
+                                    {
+                                        <img src="gfx/crown.png" style="float:right;" asp-append-version="true" width="48" />
+                                    }
+
                                 </div>
                                 <div class="card-body text-center">
+
+
                                     @foreach (var hiddenCard in player.FaceDownCards)
                                     {
                                         <img src="/cardback.png"

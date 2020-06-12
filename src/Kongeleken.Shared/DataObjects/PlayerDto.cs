@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Kongeleken.Shared.Constants;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,5 +11,6 @@ namespace Kongeleken.Shared.DataObjects
         public string Name { get; set; }
         public List<CardDto> FaceUpCards { get; set; }
         public List<FaceDownCardDto> FaceDownCards { get; set; }
+        public List<PlayerFlag> PlayerFlags { get; set; } = new List<PlayerFlag>();
     }
 }

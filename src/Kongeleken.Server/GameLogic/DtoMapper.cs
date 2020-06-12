@@ -57,6 +57,8 @@ namespace Kongeleken.Server.GameLogic
                 }
             }
 
+            dto.PlayerFlags.AddRange(player.PlayerFlags);
+
             return dto;
         }
 

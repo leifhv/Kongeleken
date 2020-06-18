@@ -7,6 +7,7 @@ namespace Kongeleken.Shared.Constants
     public enum UserAction
     {
         None,
+        Cheat,
         Drink,
         DrinkChicken,
         DrinkCheater,

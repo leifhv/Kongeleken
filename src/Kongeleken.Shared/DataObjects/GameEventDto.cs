@@ -17,5 +17,11 @@ namespace Kongeleken.Shared.DataObjects
         {
             get;set;
         }
+
+        //The id of the target for the event (playerid, cardid, gameid...)
+        public string TargetId
+        {
+            get;set;
+        }
     }
 }

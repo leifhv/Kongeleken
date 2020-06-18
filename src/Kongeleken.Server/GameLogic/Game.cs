@@ -24,5 +24,10 @@ namespace Kongeleken.Server.GameLogic
         {
             GameActions.Add(new GameActionDto(playerId, gameActionDescription, userAction));
         }
+
+        public List<GameActionDto> GetGameActions()
+        {
+            return this.GameActions.ToList();
+        }
     }
 }

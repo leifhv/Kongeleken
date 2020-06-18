@@ -33,7 +33,7 @@ namespace Kongeleken.Server.GameLogic
         public async Task<Result<StartNewGameResponse>> StartNewGameAsync(string initiatingPlayerName)
         {
             var newGame =  _gameStore.CreateNew();
-            newGame.AddGameAction($"{initiatingPlayerName} started the game");
+            newGame.AddGameAction(initiatingPlayerName, $"{initiatingPlayerName} started the game", UserAction.None);
 
             newGame.CardDeck = new CardDeck();
             newGame.CardDeck.Shuffle();
@@ -61,7 +61,7 @@ namespace Kongeleken.Server.GameLogic
             lock (_lockObject)
             {
                 game.Players.Add(player);
-                game.AddGameAction($"{playerName} joined the game");
+                game.AddGameAction(playerName, $"{playerName} joined the game", UserAction.None);
             }
 
             return newPlayerId;
@@ -123,7 +123,7 @@ namespace Kongeleken.Server.GameLogic
                 case GameEventType.ShuffleDeck:
                     game.Players.ForEach(p => p.CurrentCard = null);
                     game.CardDeck.Shuffle();
-                    game.AddGameAction($"{initiatingPlayer.Name} shuffled the deck");
+                    game.AddGameAction(initiatingPlayer.Name, $"{initiatingPlayer.Name} shuffled the deck", UserAction.None);
                     break;
                 case GameEventType.Deal:
                 {
@@ -159,19 +159,19 @@ namespace Kongeleken.Server.GameLogic
         {
             if(game.Players.Any(p => p.CurrentCard != null &&  !p.CurrentCard.IsTurned))
             {
-                game.AddGameAction($"{initiatingPlayer.Name} tried dealing, but the round is not finished yet");
+                game.AddGameAction(initiatingPlayer.Name, $"{initiatingPlayer.Name} tried dealing, but the round is not finished yet", UserAction.None);
                 return;
             }
             
             if(initiatingPlayer.Id != game.DealerPlayerId)
             {
-                game.AddGameAction($"{initiatingPlayer.Name} tried dealing, but he's not the current dealer!!!");
+                game.AddGameAction(initiatingPlayer.Name, $"{initiatingPlayer.Name} tried dealing, but he's not the current dealer!!!", UserAction.None);
                 return;
             }
 
             if(game.CardDeck.Count < game.Players.Count)
             {
-                game.AddGameAction($"{initiatingPlayer.Name} tried dealing, but he's running out of cards in the deck");
+                game.AddGameAction(initiatingPlayer.Name, $"{initiatingPlayer.Name} tried dealing, but he's running out of cards in the deck", UserAction.None);
                 return;
             }
 
@@ -182,7 +182,7 @@ namespace Kongeleken.Server.GameLogic
                 player.CurrentCard.IsTurned = false;
                 game.CardDeck.RemoveAt(0);
             }
-            game.AddGameAction($"{initiatingPlayer.Name} dealt cards");
+            game.AddGameAction(initiatingPlayer.Name, $"{initiatingPlayer.Name} dealt cards", UserAction.None);
         }
 
         
@@ -192,7 +192,7 @@ namespace Kongeleken.Server.GameLogic
 
             if(player.CurrentCard == null)
             {
-                game.AddGameAction($"{initiatingPlayer.Name} tried turing his card...but it's not longer there!");
+                game.AddGameAction(initiatingPlayer.Name, $"{initiatingPlayer.Name} tried turing his card...but it's not longer there!", UserAction.None);
                 return;
             }
 
@@ -203,36 +203,31 @@ namespace Kongeleken.Server.GameLogic
                 var turnCardOwner = game.Players.FirstOrDefault(p => p.CurrentCard.Id == gameEventDto.TargetId);
                 if(turnCardOwner != null)
                 {
-                    game.AddGameAction($"{initiatingPlayer.Name} tried turing the card belonging to {turnCardOwner.Name}");
+                    game.AddGameAction(initiatingPlayer.Name, $"{initiatingPlayer.Name} tried turing the card belonging to {turnCardOwner.Name}", UserAction.Cheat);
                 }                
                 return;
             }
 
             card.IsTurned = true;
 
-            game.AddGameAction($"{initiatingPlayer.Name} turned his card");
+            game.AddGameAction(initiatingPlayer.Name, $"{initiatingPlayer.Name} turned his card", UserAction.None);
 
             if (game.Players.All(p => p.CurrentCard.IsTurned))
             {
                 var lowestCard = game.Players.Select(p => p.CurrentCard.Value).Min();
                 var loosers = game.Players.Where(p => p.CurrentCard.Value == lowestCard).ToList();
-                loosers.ForEach(l => l.AddFlag(PlayerFlag.Drink));
-                
-                if(loosers.Count() == 1)
+                foreach (var loser in loosers)
                 {
-                    game.AddGameAction($"Lowest card is {lowestCard}. Looser this round is {loosers.First().Name}.  DRINK!");
-                }
-                else
-                {
-                    game.AddGameAction($"Lowest card is {lowestCard}. Loosers this round are " + string.Join(",", loosers.Select(l => l.Name)) + ".  DRINK!");
+                    loser.AddFlag(PlayerFlag.Drink);
+                    game.GameActions.Add(new GameActionDto(loser.Name, $"Lowest card is {lowestCard}. Looser this round is {loser.Name}.  DRINK!", UserAction.Drink));
                 }
 
                 //Handle king
                 var playersWithKing = game.Players.Where(p => p.CurrentCard.Value == CardValue.King);
                 foreach (var playerWithKing in playersWithKing)
                 {
-                    game.AddGameAction($"{playerWithKing.Name} got a king! ***DRINK!***");
                     playerWithKing.AddFlag(PlayerFlag.King);
+                    game.GameActions.Add(new GameActionDto(playerWithKing.Name, $"{playerWithKing.Name} got a king! ***DRINK!***", UserAction.DrinkKing));
                 }
 
                 //Handle queen
@@ -247,7 +242,7 @@ namespace Kongeleken.Server.GameLogic
                     {
                         otherPlayersWithPictureCard.ForEach(p => p.AddFlag(PlayerFlag.Drink));
                         var playerNames = string.Join(",", otherPlayersWithPictureCard.Select(l => l.Name));
-                        game.AddGameAction($"{playerWithQueen.Name} got a queen! {playerNames} must DRINK!");
+                        game.AddGameAction(playerWithQueen.Name, $"{playerWithQueen.Name} got a queen! {playerNames} must DRINK!", UserAction.DrinkQueen);
                     }
                 }
 
@@ -259,7 +254,7 @@ namespace Kongeleken.Server.GameLogic
                     playersExceptCurrent.ForEach(p => p.AddFlag(PlayerFlag.Drink));
 
                     var playerNames = string.Join(",", playersExceptCurrent.Select(l => l.Name));
-                    game.AddGameAction($"{playerWithJack.Name} got a jack! {playerNames} must DRINK!");
+                    game.GameActions.Add(new GameActionDto(playerWithJack.Name, $"{playerWithJack.Name} got a jack! {playerNames} must DRINK!", UserAction.DrinkJack));
                 }
                 //TODO:
                 //If a player receives a 6 of hearts he is to be given three new cards and all players must act according to these cards before a new round is started.

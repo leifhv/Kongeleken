@@ -33,7 +33,7 @@ namespace Kongeleken.Server.GameLogic
             }
 
             dto.GameActions = new List<string>();
-            dto.GameActions.AddRange(game.GameActions);
+            dto.GameActions.AddRange(game.GetGameActions());
             dto.GameActions.Reverse();
             return dto;
         }

@@ -235,12 +235,12 @@ else
 
     private async Task ShuffleCardsClicked()
     {
-        await PostGameEvent(GameEventType.ShuffleDeck);
+        await PostGameEvent(GameEventType.ShuffleDeck,"");
     }
 
     private async Task TurnCard(FaceDownCardDto card)
     {
-        await PostGameEvent(GameEventType.TurnCard);
+        await PostGameEvent(GameEventType.TurnCard,card.Id);
 
         //var request = new TurnCardRequest();
         //request.GameId = _game.Id;
@@ -301,16 +301,17 @@ else
 
     private async Task DealCardsClicked()
     {
-        await PostGameEvent(GameEventType.Deal);
+        await PostGameEvent(GameEventType.Deal,"");
     }
 
-    private async Task PostGameEvent(GameEventType gameEventType)
+    private async Task PostGameEvent(GameEventType gameEventType,string targetId)
     {
         var request = new NewGameEventRequest();
         request.GameEvent = new GameEventDto();
         request.GameEvent.EventType = gameEventType;
         request.GameEvent.GameId = _game.Id;
         request.GameEvent.PlayerId = _playerId;
+        request.GameEvent.TargetId = targetId;
 
         var httpResponse = await Http.PostAsJsonAsync<NewGameEventRequest>($"api/game/event", request);
 

@@ -19,7 +19,8 @@ namespace Kongeleken.Server.GameLogic
         
         public string DealerPlayerId { get; set; }
 
-        public List<string> GameActions = new List<string>();
+        private List<string> GameActions = new List<string>();
+
         public void AddGameAction(string gameActionDescription)
         {
             GameActions.Add(gameActionDescription);
@@ -27,6 +28,11 @@ namespace Kongeleken.Server.GameLogic
             {
                 GameActions.RemoveAt(0);
             }
+        }
+
+        public List<string> GetGameActions()
+        {
+            return GameActions.ToList();
         }
     }
 }

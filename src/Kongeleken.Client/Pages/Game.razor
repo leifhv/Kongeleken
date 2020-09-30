@@ -13,102 +13,102 @@
 }
 else
 {
-<div class="container-fluid">
+    <div class="container-fluid">
 
-    <div class=".mat-elevation-z2">
+        <div class=".mat-elevation-z2">
 
-        <div class="row">
-            <div class="col-md-2">
-                <MatStringField ReadOnly="true" Value="@_game.Id" Label="Game Id"></MatStringField>
-            </div>
-            <div class="col-md-2">
-                <MatStringField ReadOnly="true" Value="@_playerName" Label="Player Name"></MatStringField>
-            </div>
-            <div class="col-md-2">
-                <MatStringField ReadOnly="true" Value="@_game.DealerName" Label="Dealer Name"></MatStringField>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mt-3">
-        <div><MatButton Raised="true" OnClick="DealCardsClicked" Disabled=@DealDisabled> Deal </MatButton></div>
-        <div class="ml-2"><MatButton Raised="true" OnClick="ShuffleCardsClicked" Disabled=@ShuffleDisabled> Shuffle </MatButton></div>
-        <div class="ml-2"><MatButton Raised="true" OnClick="RefreshGameClicked"> Refresh </MatButton></div>
-    </div>
-
-    <div class="row mt-3">
-        <div class="col-md-8">
             <div class="row">
-                @if (_game != null)
-                {
-                    @foreach (var player in _game.Players)
-                    {
-                        <div class="col-4 h-100 mb-3">
-                            <div class="card mb-4 box-shadow">
-                                <div class="card-header">
-                                    <h4 class="my-0 font-weight-normal" style="float:left;" >@player.Name</h4>
-                                    @foreach (var drink in player.PlayerFlags.Where(f => f== PlayerFlag.Drink))
-                                    {
-                                        <img src="gfx/beer.png" style="float:right;" asp-append-version="true" width="48" />
-                                    }
-                                    
-                                    @foreach (var king in player.PlayerFlags.Where(f => f == PlayerFlag.King))
-                                    {
-                                        <img src="gfx/crown.png" style="float:right;" asp-append-version="true" width="48" />
-                                    }
-
-                                </div>
-                                <div class="card-body text-center">
-
-
-                                    @foreach (var hiddenCard in player.FaceDownCards)
-                                    {
-                                        <img src="/cardback.png"
-                                             asp-append-version="true" height="80"
-                                             @onclick="@(() => @TurnCard(hiddenCard))" />
-                                    }
-                                    @foreach (var visibleCard in player.FaceUpCards)
-                                    {
-                                        <img src="@CardToFileName(visibleCard)"
-                                             asp-append-version="true" height="80" />
-
-                                        @if (GetAction(player) != UserAction.None)
-                                        {
-                                            <img src="~/Gfx/Beer.png"
-                                                 asp-append-version="true" height="80" />
-                                        }
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    }
-                }
+                <div class="col-md-2">
+                    <MatStringField ReadOnly="true" Value="@_game.Id" Label="Game Id"></MatStringField>
+                </div>
+                <div class="col-md-2">
+                    <MatStringField ReadOnly="true" Value="@_playerName" Label="Player Name"></MatStringField>
+                </div>
+                <div class="col-md-2">
+                    <MatStringField ReadOnly="true" Value="@_game.DealerName" Label="Dealer Name"></MatStringField>
+                </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Game Action</th>
-                    </tr>
-                </thead>
 
-                <tbody>
+        <div class="row mt-3">
+            <div><MatButton Raised="true" OnClick="DealCardsClicked" Disabled=@DealDisabled> Deal </MatButton></div>
+            <div class="ml-2"><MatButton Raised="true" OnClick="ShuffleCardsClicked" Disabled=@ShuffleDisabled> Shuffle </MatButton></div>
+            <div class="ml-2"><MatButton Raised="true" OnClick="RefreshGameClicked"> Refresh </MatButton></div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-8">
+                <div class="row">
                     @if (_game != null)
                     {
-                        @foreach (var gameAction in _game.GameActions) // .OrderBy(a => a.When).Take(10))
+                        @foreach (var player in _game.Players)
                         {
-                            <tr>
-                                <td class="small">@gameAction.Description</td>
-                            </tr>
+                            <div class="col-4 h-100 mb-3">
+                                <div class="card mb-4 box-shadow">
+                                    <div class="card-header">
+                                        <h4 class="my-0 font-weight-normal" style="float:left;" >@player.Name</h4>
+                                        @foreach (var drink in player.PlayerFlags.Where(f => f== PlayerFlag.Drink))
+                                        {
+                                            <img src="gfx/beer.png" style="float:right;" asp-append-version="true" width="48" />
+                                        }
+
+                                        @foreach (var king in player.PlayerFlags.Where(f => f == PlayerFlag.King))
+                                        {
+                                            <img src="gfx/crown.png" style="float:right;" asp-append-version="true" width="48" />
+                                        }
+
+                                    </div>
+                                    <div class="card-body text-center">
+
+
+                                        @foreach (var hiddenCard in player.FaceDownCards)
+                                        {
+                                            <img src="/cardback.png"
+                                                 asp-append-version="true" height="80"
+                                                 @onclick="@(() => @TurnCard(hiddenCard))" />
+                                        }
+                                        @foreach (var visibleCard in player.FaceUpCards)
+                                        {
+                                            <img src="@CardToFileName(visibleCard)"
+                                                 asp-append-version="true" height="80" />
+
+                                            @if (GetAction(player) != UserAction.None)
+                                            {
+                                                <img src="~/Gfx/Beer.png"
+                                                     asp-append-version="true" height="80" />
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            </div>
                         }
                     }
-                </tbody>
-            </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Game Action</th>
+                        </tr>
+                    </thead>
 
+                    <tbody>
+                        @if (_game != null)
+                        {
+                            @foreach (var gameAction in _game.GameActions) // .OrderBy(a => a.When).Take(10))
+                            {
+                                <tr>
+                                    <td class="small">@gameAction.Description</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+
+            </div>
         </div>
     </div>
-</div>
 
 
 
@@ -246,24 +246,7 @@ else
 
     private async Task TurnCard(FaceDownCardDto card)
     {
-        await PostGameEvent(GameEventType.TurnCard,card.Id);
-
-        //var request = new TurnCardRequest();
-        //request.GameId = _game.Id;
-        //request.PlayerId = _playerId;
-        //request.CardId = card.Id;
-
-        //var httpResponse = await Http.PostAsJsonAsync<TurnCardRequest>($"api/game/card", request);
-
-        //if (httpResponse.IsSuccessStatusCode)
-        //{
-        //    _game = await GetGame(_game.Id);
-        //    _errorMessage = "Turned card " + card.Id;
-        //}
-        //else
-        //{
-        //    _errorMessage = httpResponse.StatusCode + ":" + httpResponse.ReasonPhrase;
-        //}
+        await PostGameEvent(GameEventType.TurnCard, card.Id);
     }
 
     private string CardToFileName(CardDto card)

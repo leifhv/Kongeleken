@@ -10,6 +10,7 @@ namespace Kongeleken.Shared.Constants
         ShuffleDeck,
         Deal,
         TurnCard,
-        Join
+        Join,
+        Say
     }
 }

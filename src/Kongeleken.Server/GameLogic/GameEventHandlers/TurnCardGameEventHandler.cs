@@ -42,7 +42,7 @@ namespace Kongeleken.Server.GameLogic.GameEventHandlers
                 foreach (var loser in loosers)
                 {
                     loser.AddFlag(PlayerFlag.Drink);
-                    game.GameActions.Add(new GameActionDto(loser.Name, $"Lowest card is {lowestCard}. Looser this round is {loser.Name}.  DRINK!", UserAction.Drink));
+                    game.GameActions.Add(new GameActionDto(loser.Name, $"Lowest card is {lowestCard}. Loser this round is {loser.Name}.  DRINK!", UserAction.Drink));
                 }
 
                 //Handle king

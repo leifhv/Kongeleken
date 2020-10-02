@@ -23,6 +23,10 @@ namespace Kongeleken.Server.GameLogic
         public void AddGameAction(string playerId, string gameActionDescription, UserAction userAction)
         {
             GameActions.Add(new GameActionDto(playerId, gameActionDescription, userAction));
+            if (GameActions.Count > 10)
+            {
+                GameActions.RemoveAt(0);
+            }
         }
 
         public List<GameActionDto> GetGameActions()
